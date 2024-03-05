@@ -12,9 +12,9 @@ public class FlashlightManager : MonoBehaviour
     
     private void OnDisable() {GameDifficultyManager.OnGameDifficultySelect -= SetFlashlightDifficult;}
 
-    // private void Update() {
-    //     HelloTest();
-    // }
+    private void Awake() {
+        HelloTest();
+    }
     public void HelloTest()
     {
         OnGameDifficultySelectFlashlight?.Invoke(easyFlashlight);

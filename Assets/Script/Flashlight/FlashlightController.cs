@@ -5,26 +5,26 @@ public class FlashlightController : MonoBehaviour
 {
     [SerializeField] private float currentIntensity_m;
     [SerializeField] private float lightPeakIntensity , lightModerateIntensity , lightGlimmerIntensity;
-    [SerializeField] private float transitionTime = 3.0f;
+    [SerializeField] private float transitionTime = 2.0f;
     [SerializeField] private bool IsOpenable_m = true , IsOpenable_S = false;
     [SerializeField] private bool IsOpen;
+    [SerializeField] private bool IsStateChanging = false;
     private FlashLightSetting currentDifficultyFlashlightSetting;
     [SerializeField] private Light flashLight;
     private KeyCode flashLightKeyCode;
     private void OnEnable() 
     {
         FlashlightManager.OnGameDifficultySelectFlashlight += SetFlashlightSetting;
-        FlashlightBattery.OnBatteryPowerChange += UpdateFlashlightState;
+        FlashlightBattery.OnBatteryPowerChange += UpdateFlashlight;
     }
     private void OnDisable() 
     {
         FlashlightManager.OnGameDifficultySelectFlashlight -= SetFlashlightSetting;
-        FlashlightBattery.OnBatteryPowerChange -= UpdateFlashlightState;
+        FlashlightBattery.OnBatteryPowerChange -= UpdateFlashlight;
     }
     private void Awake() 
     {
         flashLightKeyCode = KeyCode.F;
-        currentIntensity_m = 0.0f;
     }
     private void SetFlashlightSetting(FlashLightSetting flashLightSetting)
     {
@@ -36,11 +36,11 @@ public class FlashlightController : MonoBehaviour
     }
     private void Update() 
     {
-        if(Input.GetKeyDown(flashLightKeyCode)) {ToggleFlashlight();}
+        if(Input.GetKeyDown(flashLightKeyCode) && IsOpenable_m) {ToggleFlashlight();}
         
     }
 
-    private void UpdateFlashlightState()
+    private void UpdateFlashlight()
     {
         switch(FlashlightState.Instance.CurrentFlashlightState)
         {
@@ -51,12 +51,13 @@ public class FlashlightController : MonoBehaviour
                 flashLight.enabled = false;
                 break;
             case FlashlightState.FlashlightStateEnum.Glimmer :
-                StartCoroutine(SmoothChangeLightIntensity(lightModerateIntensity, lightGlimmerIntensity, transitionTime));
+                if(IsStateChanging) return;
+                StartCoroutine(SmoothChangeLightIntensity(currentIntensity_m, lightGlimmerIntensity, transitionTime));
                 flashLight.enabled = true;
                 break;
             case FlashlightState.FlashlightStateEnum.Moderate :
-                StartCoroutine(SmoothChangeLightIntensity(lightPeakIntensity, lightModerateIntensity, transitionTime));
-                flashLight.intensity = lightModerateIntensity;
+                if(IsStateChanging) return;
+                StartCoroutine(SmoothChangeLightIntensity(currentIntensity_m, lightModerateIntensity, transitionTime));
                 flashLight.enabled = true;
                 break;
             case FlashlightState.FlashlightStateEnum.Peak :
@@ -73,6 +74,9 @@ public class FlashlightController : MonoBehaviour
             flashLight.enabled = false;
             IsOpen = false;
         }
+
+        if(FlashlightBattery.Instance.CurrentBatteryLife <= 0) {IsOpenable_m = false;}
+        else {IsOpenable_m = true;}
     }
     private void ToggleFlashlight()
     {
@@ -101,24 +105,30 @@ public class FlashlightController : MonoBehaviour
                     break;
             }
         }
-        UpdateFlashlightState();
+        UpdateFlashlight();
         IsOpen = flashLight.enabled;
     }
 
     private IEnumerator SmoothChangeLightIntensity(float currentIntensity , float newIntensity , float transitionTime)
     {
         float elapsedTime = 0f;
-        while(elapsedTime < transitionTime)
+        float startIntensity = currentIntensity;
+        IsStateChanging = true;
+        while (elapsedTime < transitionTime)
         {
-            float changeIntensity = Mathf.Lerp(currentIntensity , newIntensity , transitionTime);
+
+            Debug.Log(elapsedTime);
+            float t = elapsedTime / transitionTime;
+            float interpolatedIntensity = Mathf.Lerp(startIntensity, newIntensity, t);
+            //Debug.Log("Currently changing with this intensity : " + interpolatedIntensity);
             elapsedTime += Time.deltaTime;
-            yield return changeIntensity;
-            currentIntensity_m = changeIntensity;
-            flashLight.intensity = changeIntensity;
+            currentIntensity_m = interpolatedIntensity; // Update current intensity directly with the interpolated value
+            flashLight.intensity = interpolatedIntensity;
+            yield return null;
         }
-        yield return newIntensity;
-        
-        
+        IsStateChanging = false;
+        flashLight.intensity = newIntensity; // Ensure that the final intensity is set correctly
+        currentIntensity_m = newIntensity;     
     }
 }
 

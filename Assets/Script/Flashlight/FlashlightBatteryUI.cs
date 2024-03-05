@@ -17,7 +17,7 @@ public class FlashlightBatteryUI : MonoBehaviour
 
     private void OnBatteryChange(float batteryPercentage)
     {
-        Debug.Log(batteryPercentage);
+//        Debug.Log(batteryPercentage);
         batteryBar.fillAmount = batteryPercentage;
     }
 }

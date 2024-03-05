@@ -14,6 +14,7 @@ public class FlashlightState : MonoBehaviour
         {
             currentFlashlightState = value;
             OnFlashlightStateChanged?.Invoke(currentFlashlightState);
+            
         }
     }
 

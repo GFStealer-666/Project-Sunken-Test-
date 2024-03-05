@@ -9,6 +9,8 @@ public class FlashlightBattery : MonoBehaviour
     [SerializeField] private float batteryDrainPerSecond;
     [SerializeField] private float batteryPercentage ;
 
+    [SerializeField] private bool IsDrainBattery = false;
+
     public float CurrentBatteryLife 
     {
         get => currentBatteryLife;
@@ -27,7 +29,7 @@ public class FlashlightBattery : MonoBehaviour
             OnBatteryPercentageChange?.Invoke(batteryPercentage);
         }
     }
-    private float minPeakBattery = 0.75f , minModerateBattery = 0.30f , minGlimmerBattery = 0.00000000000001f;
+    [SerializeField] private float minPeakBattery, minModerateBattery , minGlimmerBattery;
     public enum BatteryLifeLevel {Peak , Moderate , Glimmer , Depleted};
     public BatteryLifeLevel currentBatteryLifeLevel;
     public static FlashlightBattery Instance;
@@ -38,7 +40,6 @@ public class FlashlightBattery : MonoBehaviour
     private void Awake() 
     {
         Instance = this;
-        currentBatteryLifeLevel = BatteryLifeLevel.Moderate;
     }
     private void SetFlashlightSetting(FlashLightSetting flashLightSetting)
     {
@@ -48,20 +49,27 @@ public class FlashlightBattery : MonoBehaviour
         currentBatteryLife = currentDifficultyFlashlightSetting.startBatteryLife;
         batteryDrainPerSecond = currentDifficultyFlashlightSetting.batteryDrainPerSecond;
 
+        minPeakBattery = currentDifficultyFlashlightSetting.lightModerateIntensity - 0.01f;
+        minModerateBattery = currentDifficultyFlashlightSetting.lightGlimmerIntensity - 0.01f;
+
     }
     private void Update() 
     {
+        if (IsDrainBattery == false) return;
+
         if(FlashlightState.Instance.CurrentFlashlightState != FlashlightState.FlashlightStateEnum.Off 
         && FlashlightState.Instance.CurrentFlashlightState != FlashlightState.FlashlightStateEnum.Depleted)
         {
             DrainBattery();
             SetBatteryState();
         }
+        
     }
     private void DrainBattery()
     {
-        if(FlashlightState.Instance.CurrentFlashlightState == FlashlightState.FlashlightStateEnum.Depleted) return;
-        CurrentBatteryLife -= (batteryDrainPerSecond * Time.deltaTime);
+        Debug.Log("IS IT HERE?");
+        //if(FlashlightState.Instance.CurrentFlashlightState == FlashlightState.FlashlightStateEnum.Depleted) return;
+        CurrentBatteryLife -= batteryDrainPerSecond * Time.deltaTime;
         if(CurrentBatteryLife <= 0) 
         {
             FlashlightState.Instance.CurrentFlashlightState = FlashlightState.FlashlightStateEnum.Depleted; 
@@ -105,7 +113,7 @@ public class FlashlightBattery : MonoBehaviour
         return currentBatteryLifeLevel;
     }
 
-    private float GetCurrentBatteryLife() => CurrentBatteryLife;
+    public float GetCurrentBatteryLife() => CurrentBatteryLife;
 
 
 }

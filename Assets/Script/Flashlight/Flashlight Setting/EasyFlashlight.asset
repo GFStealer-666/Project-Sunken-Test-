@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: EasyFlashlight
   m_EditorClassIdentifier: 
   lightRadius: 10
-  lightPeakIntensity: 3
-  lightModerateIntensity: 2
-  lightGlimmerIntensity: 1
-  maxBatteryLife: 500
-  startBatteryLife: 500
-  batteryDrainPerSecond: 5
+  lightPeakIntensity: 1
+  lightModerateIntensity: 0.8
+  lightGlimmerIntensity: 0.5
+  maxBatteryLife: 300
+  startBatteryLife: 300
+  batteryDrainPerSecond: 20
