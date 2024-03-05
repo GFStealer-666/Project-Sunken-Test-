@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Bottle/Scripts/Scenes/Flashlight Test.unity
+- path: Assets/Script/Bottle/Scenes/Flashlight Test.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0
