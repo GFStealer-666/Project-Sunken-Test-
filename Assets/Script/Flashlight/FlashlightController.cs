@@ -74,7 +74,7 @@ public class FlashlightController : MonoBehaviour
             IsOpen = false;
         }
     }
-    private void ToggleFlashlight()
+    public void ToggleFlashlight()
     {
         if(IsOpen)
         {
